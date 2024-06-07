@@ -12,6 +12,9 @@ def get_weather(api_key, city, date):
         if response.status_code == 401:
             return "Error: Unauthorized. Please check your API key."
 
+        if response.status_code == 404:
+            return "Error: City not found. Please check the city name."
+
         if response.status_code != 200:
             return f"Error: Unable to fetch data. Status code: {response.status_code}"
 
@@ -29,7 +32,7 @@ def get_weather(api_key, city, date):
                 weather_description = forecast['weather'][0]['description']
                 return f"Weather in {city} on {date}: {weather_description}, temperature: {temp}°C"
 
-        return "Weather data for the given date is not available."
+        return "Error: Weather data for the given date is not available."
 
     except Exception as e:
         return f"Error: {str(e)}"
@@ -50,15 +53,21 @@ def is_valid_date(date):
 if __name__ == "__main__":
     api_key = "f63364cab88fa91f8a1cfbc22295a4ae"
 
-    city = input("Enter city: ")
-    while not is_valid_city(city):
-        print("Invalid city name. City should consist of one word and contain no numbers.")
+    while True:
         city = input("Enter city: ")
+        while not is_valid_city(city):
+            print("Invalid city name. City should consist of one word and contain no numbers.")
+            city = input("Enter city: ")
 
-    date = input("Enter date (YYYY-MM-DD): ")
-    while not is_valid_date(date):
-        print("Invalid date. Please enter the date in YYYY-MM-DD format.")
         date = input("Enter date (YYYY-MM-DD): ")
+        while not is_valid_date(date):
+            print("Invalid date. Please enter the date in YYYY-MM-DD format.")
+            date = input("Enter date (YYYY-MM-DD): ")
 
-    weather_report = get_weather(api_key, city, date)
-    print(weather_report)
+        weather_report = get_weather(api_key, city, date)
+        print(weather_report)
+
+        if "Error: City not found" not in weather_report and "Error: Weather data for the given date is not available." not in weather_report:
+            break
+
+        print("Please try again with a valid city and date.")
